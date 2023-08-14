@@ -1,6 +1,6 @@
 <?php
 
-namespace Goodmain\TelescopeStatistics\Collectors;
+namespace Goodmain\TelescopeAggregate\Collectors;
 
 use Illuminate\Support\Collection;
 use Laravel\Telescope\EntryType;
@@ -21,9 +21,9 @@ class QueryCollector extends Collector
         $this->saveData($data);
     }
 
-    public function collectFromStatistics(): void
+    public function collectFromAggregate(): void
     {
-        $data = $this->buildStatisticsQuery(
+        $data = $this->buildAggregateQuery(
             'COUNT(*) as "count",
             SUM((content->>\'time\') :: DECIMAL) as "time",
             SUM((content->>\'slow_count\') :: DECIMAL) as "slow_count",

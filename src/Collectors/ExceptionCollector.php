@@ -1,6 +1,6 @@
 <?php
 
-namespace Goodmain\TelescopeStatistics\Collectors;
+namespace Goodmain\TelescopeAggregate\Collectors;
 
 use Illuminate\Support\Collection;
 use Laravel\Telescope\EntryType;
@@ -19,9 +19,9 @@ class ExceptionCollector extends Collector
         $this->saveData($data);
     }
 
-    public function collectFromStatistics(): void
+    public function collectFromAggregate(): void
     {
-        $data = $this->buildStatisticsQuery(
+        $data = $this->buildAggregateQuery(
             'COUNT(*) as "count",
             SUM((content->>\'occurrences\') :: DECIMAL) as "occurrences"'
         )->get();

@@ -1,6 +1,6 @@
 <?php
 
-namespace Goodmain\TelescopeStatistics\Collectors;
+namespace Goodmain\TelescopeAggregate\Collectors;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -25,12 +25,19 @@ abstract class Collector
     ];
 
     public const SOURCE_TELESCOPE = 'telescope';
-    public const SOURCE_STATISTICS = 'statistics';
+    public const SOURCE_AGGREGATE = 'aggregate';
 
     public const SOURCES = [
         self::SOURCE_TELESCOPE,
-        self::SOURCE_STATISTICS,
+        self::SOURCE_AGGREGATE,
     ];
+
+    /**
+     * The database connection name that should be used.
+     *
+     * @var string
+     */
+    protected string $connection;
 
     /**
      * The configured collector options.
@@ -86,6 +93,7 @@ abstract class Collector
     {
         $this->options = $options;
         $this->command = $command;
+        $this->connection = config('telescope-aggregate.storage.database.connection');
 
         $this->from = Arr::get($options, 'from');
         $this->to = Arr::get($options, 'to');
@@ -100,46 +108,46 @@ abstract class Collector
     public function collect(): void
     {
         if (!$this->options['enabled']) {
-            //$this->command->warn('Switched off. Skip!');
-
             return;
         }
 
-        $source = config('telescope-statistics.sources.' . $this->periodType);
+        $source = config('telescope-aggregate.sources.' . $this->periodType);
 
         if ($source === self::SOURCE_TELESCOPE) {
             $this->collectFromTelescope();
-        } elseif ($source === self::SOURCE_STATISTICS) {
-            $this->collectFromStatistics();
+        } elseif ($source === self::SOURCE_AGGREGATE) {
+            $this->collectFromAggregate();
         }
     }
 
     /**
-     * Collect aggregated data from telescope.
+     * Aggregated data from the telescope.
      *
      * @return void
      */
     abstract public function collectFromTelescope(): void;
 
     /**
-     * Collect aggregated data from statistics.
+     * Aggregated data from the previous aggregations.
      *
      * @return void
      */
-    abstract public function collectFromStatistics(): void;
+    abstract public function collectFromAggregate(): void;
 
     protected function buildTelescopeQuery(string $columns): Builder
     {
-        return DB::table('telescope_entries')
+        return DB::connection($this->connection)
+            ->table('telescope_entries')
             ->selectRaw($columns)
             ->where('type', $this->type)
             ->where('created_at', '>=', $this->from)
             ->where('created_at', '<', $this->to);
     }
 
-    protected function buildStatisticsQuery(string $columns): Builder
+    protected function buildAggregateQuery(string $columns): Builder
     {
-        return DB::table('telescope_statistics')
+        return DB::connection($this->connection)
+            ->table('telescope_aggregate')
             ->selectRaw($columns)
             ->where('type', $this->type)
             ->where('period_type', $this->getPreviousPeriodType())
@@ -156,9 +164,7 @@ abstract class Collector
             'content' => json_encode($content)
         ];
 
-        if (DB::table('telescope_statistics')->insert($data)) {
-            //$this->command->line('Done.');
-        }
+        DB::table('telescope_aggregate')->insert($data);
     }
 
     protected function getPreviousPeriodType(): string

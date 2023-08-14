@@ -1,6 +1,6 @@
 <?php
 
-namespace Goodmain\TelescopeStatistics\Collectors;
+namespace Goodmain\TelescopeAggregate\Collectors;
 
 use Illuminate\Support\Collection;
 use Laravel\Telescope\EntryType;
@@ -13,15 +13,15 @@ class CommandCollector extends Collector
     {
         $data = $this->buildTelescopeQuery(
             'COUNT(*) as "count",
-            SUM(CASE WHEN (content->>\'exit_code\') <> 0 THEN 1 ELSE 0 END) as "error_count"',
+            SUM(CASE WHEN ((content->>\'exit_code\') :: DECIMAL) <> 0 THEN 1 ELSE 0 END) as "error_count"',
         )->get();
 
         $this->saveData($data);
     }
 
-    public function collectFromStatistics(): void
+    public function collectFromAggregate(): void
     {
-        $data = $this->buildStatisticsQuery(
+        $data = $this->buildAggregateQuery(
             'COUNT(*) as "count",
             SUM(content->>\'error_count\') as "error_count"',
         )->get();

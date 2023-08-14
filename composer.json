@@ -1,12 +1,13 @@
 {
-    "name": "goodmain/telescope-statistics",
-    "description": "",
+    "name": "goodmain/telescope-aggregate",
+    "description": "Laravel library for collecting aggregated data from the telescope by numerous periods",
+    "keywords": ["telescope", "laravel", "aggregation"],
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Vitaly Iskrin",
-            "email": "viskrin@ronasit.com"
+            "email": "iskrinvv@gmail.com"
         }
     ],
     "require": {
@@ -20,13 +21,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Goodmain\\TelescopeStatistics\\": "src/"
+            "Goodmain\\TelescopeAggregate\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Goodmain\\TelescopeStatistics\\TelescopeStatisticsServiceProvider"
+                "Goodmain\\TelescopeAggregate\\TelescopeAggregateServiceProvider"
             ]
         }
     },
